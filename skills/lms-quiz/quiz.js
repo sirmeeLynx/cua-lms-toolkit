@@ -159,15 +159,18 @@ async function main() {
     if (cmd === 'read') { const s = await p.evaluate(() => window.__quiz || { idx: -1, q: '?' }); console.log(JSON.stringify(s)); return; }
 
     if (cmd === 'wait') {
-      const timeout = parseInt(arg || '120', 10);
+      const timeout = parseInt(arg || '5', 10);
+      const minTs = parseInt(process.argv[4] || '0', 10); // for re-selections
       await injectListener(p);
+      const curQ = (await readQuestion(p)).progress;
       const deadline = Date.now() + timeout * 1000;
       while (Date.now() < deadline) {
-        const s = await p.evaluate(() => window.__quiz || { idx: -1, q: '?' });
-        if (s.idx >= 0) { console.log(JSON.stringify(s)); return; }
-        await p.waitForTimeout(700);
+        const s = await p.evaluate(() => window.__quiz || { idx: -1, q: '?', ts: 0 });
+        // return a selection made for the CURRENT question (even if made earlier)
+        if (s.idx >= 0 && s.q === curQ && s.ts >= minTs) { console.log(JSON.stringify(s)); return; }
+        await p.waitForTimeout(250);
       }
-      console.log(JSON.stringify({ idx: -1, q: '?', timeout: true }));
+      console.log(JSON.stringify({ idx: -1, q: curQ, timeout: true }));
       return;
     }
 
