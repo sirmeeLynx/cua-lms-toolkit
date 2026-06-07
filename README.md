@@ -20,7 +20,10 @@ skills/
     study-video.sh     # orchestrator
   lms-course/          # bulk-download a whole course (composes lms-video)
     list-items.js      # enumerate course video pages via LMS API
+    transcript-index.js# index downloaded transcripts by item
     download-course.sh # parallel background downloads (concurrency-capped)
+  lms-quiz/            # interactive practice-quiz study workflow
+    quiz.js            # list/open/question/wait/next/submit primitives
 ```
 
 ## How it works
