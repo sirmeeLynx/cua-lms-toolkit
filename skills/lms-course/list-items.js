@@ -64,24 +64,33 @@ const OUT_FILE = process.argv[4] || '/tmp/lms-course/items.json';
 
   const items = [];
   for (const m of modules) {
-    const itemsUrl = base + '/modules/' + m.id + '/items?include[]=content_details&page=1&per_page=100&' + q;
-    const modItems = await page.evaluate(async (u) => {
-      const r = await fetch(u, { headers: { accept: 'application/json' } });
-      const d = await r.json();
-      return Array.isArray(d) ? d : d.items || [];
-    }, itemsUrl);
+    let pageNum = 1;
+    const perPage = 50; // API caps responses at 50; use it so pagination advances
+    while (true) {
+      const itemsUrl =
+        base + '/modules/' + m.id + '/items?include[]=content_details&page=' +
+        pageNum + '&per_page=' + perPage + '&' + q;
+      const modItems = await page.evaluate(async (u) => {
+        const r = await fetch(u, { headers: { accept: 'application/json' } });
+        const d = await r.json();
+        return Array.isArray(d) ? d : d.items || [];
+      }, itemsUrl);
 
-    for (const it of modItems) {
-      if (it.type !== 'Page') continue; // video lectures are Page items
-      const title = (it.title || '').trim();
-      const likelyVideo = /^\d+\.\d+(\.\d+)?\s/.test(title) || /\bvideo\b/i.test(title);
-      items.push({
-        itemId: it.id,
-        title,
-        moduleId: m.id,
-        moduleName: (m.name || '').trim(),
-        likelyVideo,
-      });
+      for (const it of modItems) {
+        if (it.type !== 'Page') continue; // video lectures are Page items
+        const title = (it.title || '').trim();
+        const likelyVideo = /^\d+\.\d+(\.\d+)?\s/.test(title) || /\bvideo\b/i.test(title);
+        items.push({
+          itemId: it.id,
+          title,
+          moduleId: m.id,
+          moduleName: (m.name || '').trim(),
+          likelyVideo,
+        });
+      }
+
+      if (modItems.length < perPage) break;
+      pageNum += 1;
     }
   }
 
