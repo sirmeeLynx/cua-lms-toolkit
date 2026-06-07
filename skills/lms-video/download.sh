@@ -22,11 +22,15 @@ ffmpeg -nostdin -y -loglevel error \
   "$WORK_DIR/video.mp4"
 
 echo "Extracting transcript (VTT)..."
+# Select the English subtitle track explicitly (videos may list multiple
+# languages; -map 0:s:0 would grab whichever is first, e.g. Portuguese).
 ffmpeg -nostdin -y -loglevel error \
   -headers "$HDR" \
   -i "$MASTER" \
-  -map 0:s:0 \
-  "$WORK_DIR/transcript.vtt" || echo "WARNING: subtitle extraction failed (no captions?)"
+  -map 0:s:m:language:en \
+  "$WORK_DIR/transcript.vtt" \
+  || ffmpeg -nostdin -y -loglevel error -headers "$HDR" -i "$MASTER" -map 0:s:0 "$WORK_DIR/transcript.vtt" \
+  || echo "WARNING: subtitle extraction failed (no captions?)"
 
 echo "Done:"
 ls -la "$WORK_DIR/video.mp4" "$WORK_DIR/transcript.vtt" 2>/dev/null
