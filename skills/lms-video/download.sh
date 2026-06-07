@@ -15,14 +15,14 @@ COOKIE=$(cat "$WORK_DIR/cookie_header.txt")
 HDR="Cookie: $COOKIE"$'\r\n'"Referer: https://olympus.mygreatlearning.com/"$'\r\n'"User-Agent: Mozilla/5.0"$'\r\n'
 
 echo "Downloading video..."
-ffmpeg -y -loglevel error \
+ffmpeg -nostdin -y -loglevel error \
   -headers "$HDR" \
   -i "$MASTER" \
   -map 0:v:0 -map 0:a:0 -c copy \
   "$WORK_DIR/video.mp4"
 
 echo "Extracting transcript (VTT)..."
-ffmpeg -y -loglevel error \
+ffmpeg -nostdin -y -loglevel error \
   -headers "$HDR" \
   -i "$MASTER" \
   -map 0:s:0 \

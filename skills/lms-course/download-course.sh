@@ -76,7 +76,7 @@ while IFS=$'\t' read -r MODULE_ID ITEM_ID TITLE; do
     "$VIDEO_SKILL/download.sh" "$WORK" >/dev/null 2>&1 \
       && echo "[$ITEM_ID] done: $TITLE" \
       || echo "[$ITEM_ID] FAILED: $TITLE"
-  ) &
+  ) </dev/null &
   PIDS+=("$!")
   downloaded=$((downloaded + 1))
 done <<< "$ITEMS"

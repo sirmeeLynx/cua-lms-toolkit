@@ -15,7 +15,7 @@ mkdir -p "$FRAMES"
 rm -f "$FRAMES"/*.png
 
 echo "Detecting scene changes (threshold $THRESHOLD)..."
-ffmpeg -loglevel error -i "$VIDEO" \
+ffmpeg -nostdin -loglevel error -i "$VIDEO" \
   -vf "select='gt(scene,$THRESHOLD)',metadata=print:file=$SCENES" \
   -an -fps_mode vfr -f null - 2>/dev/null
 
@@ -36,7 +36,7 @@ for t in $TIMES; do
   ss=$(printf "%02d" $((ti % 60)))
   out="$FRAMES/${mm}${ss}.png"
   [ -f "$out" ] && continue
-  ffmpeg -loglevel error -ss "$t" -i "$VIDEO" -frames:v 1 "$out" 2>/dev/null || true
+  ffmpeg -nostdin -loglevel error -ss "$t" -i "$VIDEO" -frames:v 1 "$out" 2>/dev/null || true
   count=$((count + 1))
 done
 
