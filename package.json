@@ -1,0 +1,9 @@
+{
+  "name": "cua-lms-toolkit",
+  "version": "0.1.0",
+  "description": "Computer-use-agent toolkit for studying Great Learning LMS courses inside VS Code Insiders.",
+  "private": true,
+  "dependencies": {
+    "playwright": "^1.60.0"
+  }
+}

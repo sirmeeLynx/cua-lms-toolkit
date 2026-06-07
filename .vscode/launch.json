@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "vscode-edge-devtools.debug",
+      "name": "Attach DevTools to Edge",
+      "request": "attach",
+      "port": 9222
+    }
+  ]
+}
