@@ -56,7 +56,7 @@ while IFS=$'\t' read -r MODULE_ID ITEM_ID TITLE; do
   total=$((total + 1))
   WORK="$OUT_ROOT/$MODULE_ID/$ITEM_ID"
 
-  if [ -f "$WORK/video.mp4" ]; then
+  if [ -f "$WORK/video.mp4" ] && [ -f "$WORK/transcript.vtt" ]; then
     echo "[$ITEM_ID] already downloaded - skip"
     skipped=$((skipped + 1))
     continue

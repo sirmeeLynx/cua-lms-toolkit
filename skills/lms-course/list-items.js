@@ -20,24 +20,37 @@ const OUT_FILE = process.argv[4] || '/tmp/lms-course/items.json';
   const page = ctx.pages().find((p) => p.url().includes('mygreatlearning.com'));
   if (!page) throw new Error('No Great Learning tab found.');
 
-  const url = page.url();
-  if (!COURSE_ID) COURSE_ID = (url.match(/courses\/(\d+)/) || [])[1] || '';
-  let pbId = (url.match(/pb_id=(\d+)/) || [])[1] || '';
+  const startUrl = page.url();
+  if (!COURSE_ID) COURSE_ID = (startUrl.match(/courses\/(\d+)/) || [])[1] || '';
   if (!COURSE_ID) throw new Error('Could not determine courseId.');
 
-  // Detect studentId and pbId from prior API calls if not in the URL.
-  const detected = await page.evaluate(() => {
-    const urls = performance.getEntriesByType('resource').map((r) => r.name);
-    let sid = '';
-    let pb = '';
-    for (const u of urls) {
-      if (!sid) sid = (u.match(/\/users\/(\d+)/) || [])[1] || '';
-      if (!pb) pb = (u.match(/pb_id=(\d+)/) || [])[1] || '';
-    }
-    return { sid, pb };
+  // Navigate to the course page so the SPA fires its modules/profile APIs,
+  // which expose student_id and pb_id (don't depend on prior tab state).
+  await page.goto('https://olympus.mygreatlearning.com/courses/' + COURSE_ID, {
+    waitUntil: 'domcontentloaded',
+    timeout: 20000,
   });
-  const studentId = detected.sid;
-  if (!pbId) pbId = detected.pb;
+
+  // Wait until a /users/<id>/ API call has fired (carries student_id).
+  let pbId = '';
+  let studentId = '';
+  for (let i = 0; i < 30; i++) {
+    const d = await page.evaluate(() => {
+      const urls = performance.getEntriesByType('resource').map((r) => r.name);
+      let sid = '';
+      let pb = '';
+      for (const u of urls) {
+        if (!sid) sid = (u.match(/\/users\/(\d+)/) || [])[1] || '';
+        if (!pb) pb = (u.match(/pb_id=(\d+)/) || [])[1] || '';
+      }
+      return { sid, pb };
+    });
+    studentId = d.sid;
+    pbId = d.pb;
+    if (studentId) break;
+    await page.waitForTimeout(1000);
+  }
+  if (!studentId) throw new Error('Could not detect studentId from course APIs.');
 
   const base = 'https://olympus.mygreatlearning.com/api/v1/courses/' + COURSE_ID;
   const q = 'student_id=' + studentId + '&pb_id=' + pbId + '&source=web_app';
