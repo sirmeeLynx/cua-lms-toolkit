@@ -29,6 +29,18 @@ node skills/lms-quiz/quiz.js <command> [arg]
 
 Env overrides: `CDP_PORT` (9222), `COURSE_ID`, `PB_ID`, `STUDENT_ID`.
 
+## Screenshots (`shot.js`)
+
+Some questions show an **image or MathML** (e.g. a hypothesis-test figure or code
+block) that does not come through as DOM text. `shot.js` captures the current Great
+Learning tab so the tutor can read it visually.
+
+```bash
+node skills/lms-quiz/shot.js [outPath]   # default: /tmp/quiz-shot.png
+```
+
+Connects to CDP `9222`, finds the `mygreatlearning` page, and saves a PNG.
+
 ## Tutoring loop (how the agent uses it)
 1. `list` → find unattempted practice quizzes.
 2. `open <itemId>` → present Q1 to the user.
